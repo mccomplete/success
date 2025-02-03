@@ -44,10 +44,13 @@ def generate_success_rates_query(parquet_files: list[str], bucket_size: int = 10
         for start, end in buckets
     ]
 
-    sql_query = f"SELECT\n    " + ",\n    ".join(sql_parts) + "\nFROM ("
-
-    union_parts = [f"SELECT * FROM '{file}'" for file in parquet_files]
-    sql_query += "\n    UNION ALL\n    ".join(union_parts) + "\n) AS interview_table "
+    sql_query = f"SELECT\n    " + ",\n    ".join(sql_parts)
+    sql_query += generate_union_table_expression(parquet_files)
     sql_query += "GROUP BY vehicle_type;"
-
     return sql_query
+
+def generate_union_table_expression(parquet_files: list[str]) -> str:
+    union_table_expression = "\nFROM ("
+    union_parts = [f"SELECT * FROM '{file}'" for file in parquet_files]
+    union_table_expression += "\n    UNION ALL\n    ".join(union_parts) + "\n) AS interview_table "
+    return union_table_expression
