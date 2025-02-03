@@ -1,4 +1,4 @@
-CREATE TABLE success_rates(
+CREATE TABLE interview_table (
     clip_name TEXT,
     frame_id INT,
     vehicle_type TEXT,

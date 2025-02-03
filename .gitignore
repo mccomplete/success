@@ -173,3 +173,6 @@ cython_debug/
 # DuckDB
 /success_rates_db.duckdb
 /success_rates_db.duckdb.wal
+
+# Playground files
+playground/
