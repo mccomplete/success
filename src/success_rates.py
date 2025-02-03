@@ -1,4 +1,13 @@
-def generate_success_rates_sql(bucket_size: int = 10) -> str:
+import duckdb
+
+
+def get_success_rates(parquet_files: list[str], bucket_size: int = 10) -> None:
+    query = generate_success_rates_query(parquet_files, bucket_size)
+    rows = duckdb.sql(query)
+    rows.show()
+
+
+def generate_success_rates_query(parquet_files: list[str], bucket_size: int = 10) -> str:
     """
     Generates an SQL statement to return success rates per distance bucket.
     For example, if bucket_size = 50, returns:
@@ -18,6 +27,9 @@ def generate_success_rates_sql(bucket_size: int = 10) -> str:
         for start, end in buckets
     ]
 
-    sql_query = f"SELECT\n    " + ",\n    ".join(sql_parts) + "\nFROM interview_table;"
+    sql_query = f"SELECT\n    " + ",\n    ".join(sql_parts) + "\nFROM ("
+
+    union_parts = [f"SELECT * FROM '{file}'" for file in parquet_files]
+    sql_query += "\n    UNION ALL\n    ".join(union_parts) + "\n) AS interview_table;"
 
     return sql_query
