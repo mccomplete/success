@@ -5,8 +5,8 @@ import os
 import tempfile
 import pandas as pd
 
-from exceptions import UnsupportedFileFormatError
-from success_rates import get_success_rates
+from success.exceptions import UnsupportedFileFormatError
+from success.success_rates import get_success_rates
 
 class TestSuccessRatesFileHandling(unittest.TestCase):
     def setUp(self):

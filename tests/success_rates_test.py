@@ -7,8 +7,8 @@ import unittest
 from typing import Any
 
 import duckdb
-from success_rates import get_success_rates
-from exceptions import TableNotFoundError, InvalidBucketSizeError
+from success.success_rates import get_success_rates
+from success.exceptions import TableNotFoundError, InvalidBucketSizeError
 
 class TestGetSuccessRates(unittest.TestCase):
     @classmethod

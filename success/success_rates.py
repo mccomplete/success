@@ -3,8 +3,8 @@ from typing import Any, Optional
 import duckdb
 from duckdb import DuckDBPyRelation, DuckDBPyConnection
 
-from constants import DEFAULT_BUCKET_SIZE, MAX_DISTANCE
-from exceptions import InvalidBucketSizeError, TableNotFoundError, UnsupportedFileFormatError
+from success.constants import DEFAULT_BUCKET_SIZE, MAX_DISTANCE
+from success.exceptions import InvalidBucketSizeError, TableNotFoundError, UnsupportedFileFormatError
 
 
 def get_success_rates(
