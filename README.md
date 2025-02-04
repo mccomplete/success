@@ -76,3 +76,33 @@ GROUP BY vehicle_type;
 """
 ```
 This function enables querying multiple files, treating them as a single logical table (`interview_table`). The generated SQL can be used in DuckDB to execute queries against multiple data sources.
+
+## Input and Output Schema
+
+### Input Schema
+The input must have with the following columns 
+(if there are additional columns in the input, they are ignored):
+
+| Column Name   | Type   | Description |
+|--------------|--------|-------------|
+| `vehicle_type` | `STRING` | The type of vehicle (e.g., car, truck, bike). |
+| `distance`    | `INTEGER` | The distance from the camera to the target vehicle. |
+| `detection`   | `BOOL` | Boolean (true or false) representing detection success. |
+
+Each input file must conform to this schema to ensure correct processing.
+
+### Output Schema
+The function returns a list of dictionaries with aggregated success rates per vehicle type and distance bucket.
+
+| Column Name    | Type    | Description |
+|--------------|---------|-------------|
+| `vehicle_type` | `STRING` | The type of vehicle. |
+| `fromXtoY`    | `FLOAT`  | The success rate (percentage of rows where `detection` is true) for each distance bucket. |
+
+Example output with `bucket_size=50`:
+```json
+[
+    {"vehicle_type": "car", "from1to50": 0.75, "from51to100": 0.60},
+    {"vehicle_type": "truck", "from1to50": 0.80, "from51to100": 0.50}
+]
+```
