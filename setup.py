@@ -8,7 +8,7 @@ setup(
     long_description_content_type="text/markdown",
     author="Daniel Libicki",
     author_email="daniel.libicki@gmail.com",
-    url="https://github.com/mccomplete/success_rates",
+    url="https://github.com/mccomplete/success",
     packages=find_packages(),
     install_requires=[
         "duckdb",
