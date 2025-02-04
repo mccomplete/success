@@ -3,21 +3,16 @@ from typing import Any, Optional
 import duckdb
 from duckdb import DuckDBPyRelation, DuckDBPyConnection
 
-def get_success_rates(
-        table_names: list[str], bucket_size: int = 10, db_connection: Optional[DuckDBPyConnection] = None
-) -> list[dict[str, Any]]:
-    """
-    `table_names` could be any file with a format that duckdb supports (e.g. parquet), or the name of a table stored in
-    the db referenced by `db_connection`
-    """
-    query = generate_success_rates_query(table_names, bucket_size)
-    if db_connection:
-        relation = db_connection.sql(query)
-    else:
-        relation = duckdb.sql(query)
+from exceptions import handle_duckdb_exceptions, InvalidBucketSizeError
 
-    json_result = relation_to_json(relation)
-    return json_result
+
+@handle_duckdb_exceptions
+def get_success_rates(
+        table_names: list[str], bucket_size: int = 10, db_connection: Optional[duckdb.DuckDBPyConnection] = None
+) -> list[dict[str, Any]]:
+    query = generate_success_rates_query(table_names, bucket_size)
+    relation = db_connection.sql(query) if db_connection else duckdb.sql(query)
+    return relation_to_json(relation)
 
 def relation_to_json(relation: DuckDBPyRelation) -> list[dict[str, Any]]:
     columns = relation.columns
@@ -43,7 +38,7 @@ def generate_success_rates_query(table_names: list[str], bucket_size: int = 10) 
     FROM interview_table;
     """
     if bucket_size <= 0 or bucket_size > 100:
-        raise ValueError("Bucket size must be between 1 and 100")
+        raise InvalidBucketSizeError("Bucket size must be between 1 and 100")
 
     buckets = [(i, min(i + bucket_size - 1, 100)) for i in range(1, 101, bucket_size)]
 
