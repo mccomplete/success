@@ -3,15 +3,23 @@ from typing import Any, Optional
 import duckdb
 from duckdb import DuckDBPyRelation, DuckDBPyConnection
 
-from exceptions import handle_duckdb_exceptions, InvalidBucketSizeError
+from exceptions import InvalidBucketSizeError, TableNotFoundError, UnsupportedFileFormatError
 
 
-@handle_duckdb_exceptions
 def get_success_rates(
-        table_names: list[str], bucket_size: int = 10, db_connection: Optional[duckdb.DuckDBPyConnection] = None
+        table_names: list[str], bucket_size: int = 10, db_connection: Optional[DuckDBPyConnection] = None
 ) -> list[dict[str, Any]]:
     query = generate_success_rates_query(table_names, bucket_size)
-    relation = db_connection.sql(query) if db_connection else duckdb.sql(query)
+    try:
+        relation = db_connection.sql(query) if db_connection else duckdb.sql(query)
+    except duckdb.IOException as e:
+        raise FileNotFoundError(str(e))
+    except duckdb.CatalogException as e:
+        if db_connection:
+            raise TableNotFoundError(str(e))
+        else:
+            raise UnsupportedFileFormatError(str(e))
+
     return relation_to_json(relation)
 
 def relation_to_json(relation: DuckDBPyRelation) -> list[dict[str, Any]]:
