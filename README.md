@@ -10,6 +10,23 @@ This project calculates success rates based on distance buckets from multiple da
 - Returns success rates based on vehicle types and distance ranges
 - Handles missing files and unsupported formats gracefully
 
+## Installation
+
+Run:
+
+```sh
+pip install git+https://github.com/mccomplete/success.git
+```
+
+This will fetch the latest version from the repository and install it as a Python package.
+
+To verify the installation, run:
+```sh
+python -c "import success; print(success)"
+```
+
+If no errors occur, the package has been successfully installed.
+
 ## Usage
 
 ### Function: `get_success_rates`
