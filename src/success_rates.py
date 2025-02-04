@@ -1,11 +1,21 @@
-from typing import Any
+from typing import Any, Optional
 
 import duckdb
-from duckdb import DuckDBPyRelation
+from duckdb import DuckDBPyRelation, DuckDBPyConnection
 
-def get_success_rates(parquet_files: list[str], bucket_size: int = 10) -> list[dict[str, Any]]:
-    query = generate_success_rates_query(parquet_files, bucket_size)
-    relation = duckdb.sql(query)
+def get_success_rates(
+        table_names: list[str], bucket_size: int = 10, db_connection: Optional[DuckDBPyConnection] = None
+) -> list[dict[str, Any]]:
+    """
+    `table_names` could be any file with a format that duckdb supports (e.g. parquet), or the name of a table stored in
+    the db referenced by `db_connection`
+    """
+    query = generate_success_rates_query(table_names, bucket_size)
+    if db_connection:
+        relation = db_connection.sql(query)
+    else:
+        relation = duckdb.sql(query)
+
     json_result = relation_to_json(relation)
     return json_result
 
@@ -23,7 +33,7 @@ def relation_to_json(relation: DuckDBPyRelation) -> list[dict[str, Any]]:
 
     return json_result
 
-def generate_success_rates_query(parquet_files: list[str], bucket_size: int = 10) -> str:
+def generate_success_rates_query(table_names: list[str], bucket_size: int = 10) -> str:
     """
     Generates an SQL statement to return success rates per distance bucket.
     For example, if bucket_size = 50, returns:
@@ -45,12 +55,12 @@ def generate_success_rates_query(parquet_files: list[str], bucket_size: int = 10
     ]
 
     sql_query = f"SELECT\n    " + ",\n    ".join(sql_parts)
-    sql_query += generate_union_table_expression(parquet_files)
+    sql_query += generate_union_table_expression(table_names)
     sql_query += "GROUP BY vehicle_type;"
     return sql_query
 
-def generate_union_table_expression(parquet_files: list[str]) -> str:
+def generate_union_table_expression(table_names: list[str]) -> str:
     union_table_expression = "\nFROM ("
-    union_parts = [f"SELECT * FROM '{file}'" for file in parquet_files]
+    union_parts = [f"SELECT * FROM '{file}'" for file in table_names]
     union_table_expression += "\n    UNION ALL\n    ".join(union_parts) + "\n) AS interview_table "
     return union_table_expression
