@@ -1,8 +1,3 @@
-"""
-pytest is often used for testing in the Python industry. However, I personally dislike most of the pytest features,
-and I find the pytest stack traces/error messages unreadable. So, for this project, I am using the builtin Python unittest.
-"""
-
 import unittest
 from typing import Any
 

@@ -11,7 +11,7 @@ def get_success_rates(
         table_names: list[str], bucket_size: int = DEFAULT_BUCKET_SIZE,
         db_connection: Optional[DuckDBPyConnection] = None
 ) -> list[dict[str, Any]]:
-    query = generate_success_rates_query(table_names, bucket_size)
+    query = _generate_success_rates_query(table_names, bucket_size)
     try:
         relation = db_connection.sql(query) if db_connection else duckdb.sql(query)
     except duckdb.IOException as e:
@@ -22,9 +22,9 @@ def get_success_rates(
         else:
             raise UnsupportedFileFormatError(str(e))
 
-    return relation_to_json(relation)
+    return _relation_to_json(relation)
 
-def relation_to_json(relation: DuckDBPyRelation) -> list[dict[str, Any]]:
+def _relation_to_json(relation: DuckDBPyRelation) -> list[dict[str, Any]]:
     columns = relation.columns
     data = relation.fetchall()
 
@@ -38,7 +38,7 @@ def relation_to_json(relation: DuckDBPyRelation) -> list[dict[str, Any]]:
 
     return json_result
 
-def generate_success_rates_query(table_names: list[str], bucket_size: int = 10) -> str:
+def _generate_success_rates_query(table_names: list[str], bucket_size: int = 10) -> str:
     """
     Generates an SQL statement to return success rates per distance bucket.
     For example, if bucket_size = 50, returns:
@@ -60,12 +60,12 @@ def generate_success_rates_query(table_names: list[str], bucket_size: int = 10) 
     ]
 
     sql_query = f"SELECT\n    " + ",\n    ".join(sql_parts)
-    sql_query += generate_union_table_expression(table_names)
+    sql_query += "\nFROM " + generate_union_table_expression(table_names)
     sql_query += "GROUP BY vehicle_type;"
     return sql_query
 
 def generate_union_table_expression(table_names: list[str]) -> str:
-    union_table_expression = "\nFROM ("
+    union_table_expression = "("
     union_parts = [f"SELECT * FROM '{file}'" for file in table_names]
     union_table_expression += "\n    UNION ALL\n    ".join(union_parts) + "\n) AS interview_table "
     return union_table_expression
